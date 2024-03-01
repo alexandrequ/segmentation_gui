@@ -17,7 +17,7 @@ class Segmenter:
     ):
         self.matplotlib_widget = matplotlib_widget
         # self.sam_checkbox.setChecked(True)
-        self.img = img
+        self.img = img  
         self.filePath = filePath
         self.min_mask_region_area = 100
         self.clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(9, 9))

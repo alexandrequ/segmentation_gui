@@ -23,7 +23,7 @@ class MatplotlibWidget(QWidget):
     def plot_image(self, img):
         # Clear the previous plot
         self.ax.clear()
-        self.opacity = 0.7
+        self.opacity = 1
         self.ax.imshow(img, alpha=self.opacity)
         self.ax.axis("off")  # Turn off axis labels
         self.canvas.draw()

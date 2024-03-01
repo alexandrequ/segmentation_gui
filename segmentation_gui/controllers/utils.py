@@ -225,6 +225,8 @@ class ImageController:
             self.main_window.sam_checkbox.setChecked(False)
         else:
             self.main_window.sam_group_box.setEnabled(True)
+            self.main_window.draw_checkbox.setChecked(False)
+            self.main_window.roi_checkbox.setChecked(False)
 
     def sam_checkbox_changed(self):
         if self.main_window.sam_checkbox.isChecked():
