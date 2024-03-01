@@ -41,6 +41,14 @@ class Segmenter:
                 print(file_path_pkl)
             print("Done")
 
+        max_n_masks = 10000
+        self.auto_masks = np.zeros(
+            (self.img.shape[0], self.img.shape[1], min(len(masks), max_n_masks)),
+            dtype=bool,
+        )
+        for i in range(self.auto_masks.shape[2]):
+            self.auto_masks[:, :, i] = masks[i]["segmentation"]
+
         # Initialize the Matplotlib plot within the MatplotlibWidget
         self.matplotlib_widget.ax.clear()
         self.matplotlib_widget.plot_image(self.img)
@@ -134,14 +142,6 @@ class Segmenter:
             (self.img.shape[0], self.img.shape[1]), dtype=np.uint8
         )
 
-        max_n_masks = 10000
-        self.auto_masks = np.zeros(
-            (self.img.shape[0], self.img.shape[1], min(len(masks), max_n_masks)),
-            dtype=bool,
-        )
-        for i in range(self.auto_masks.shape[2]):
-            self.auto_masks[:, :, i] = masks[i]["segmentation"]
-
     def pick_color(self):
         while True:
             color = tuple(np.random.randint(low=0, high=255, size=3).tolist())
@@ -209,6 +209,43 @@ class Segmenter:
         self.mask_plot.set_data(self.mask_data)
         self.matplotlib_widget.canvas.draw()
 
+    def load_embedding(self):
+        options = QFileDialog.Options()
+        fileName, _ = QFileDialog.getOpenFileName(
+            self.main_window,
+            "Load Embedding",
+            "",
+            "All Files (*);;Text Files (*.txt)",
+            options=options,
+        )
+        if fileName:
+            file_root, _ = os.path.splitext(fileName)
+            file_path_pkl = file_root + ".pkl"
+            if os.path.exists(file_path_pkl):
+                with open(file_path_pkl, "rb") as f:
+                    masks = pickle.load(f)
+        max_n_masks = 10000
+        self.auto_masks = np.zeros(
+            (self.img.shape[0], self.img.shape[1], min(len(masks), max_n_masks)),
+            dtype=bool,
+        )
+        for i in range(self.auto_masks.shape[2]):
+            self.auto_masks[:, :, i] = masks[i]["segmentation"]
+
+    def gen_embedding(self):
+        masks = self.auto_mask_generator.generate(self.img)
+        file_root, _ = os.path.splitext(filePath)
+        file_path_pkl = file_root + ".pkl"
+        with open(file_path_pkl, "wb") as f:
+            pickle.dump(masks, f)
+        max_n_masks = 10000
+        self.auto_masks = np.zeros(
+            (self.img.shape[0], self.img.shape[1], min(len(masks), max_n_masks)),
+            dtype=bool,
+        )
+        for i in range(self.auto_masks.shape[2]):
+            self.auto_masks[:, :, i] = masks[i]["segmentation"]
+
     def generate_mask(self):
         mask, _, _ = self.predictor.predict(
             point_coords=np.array(
@@ -239,8 +276,6 @@ class Segmenter:
             self.get_mask()
         else:
             self.clear_mask()
-
-    ### GrabCut
 
     def CLAHE_normalize(self, bgr, clahe):
         lab = cv2.cvtColor(bgr, cv2.COLOR_BGR2LAB)
